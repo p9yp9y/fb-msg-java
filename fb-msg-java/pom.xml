@@ -8,8 +8,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>pgy</groupId>
-			<artifactId>pgy-master</artifactId>
+			<groupId>p9yp9y.github.com</groupId>
+			<artifactId>parent</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
