@@ -10,8 +10,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class Main {
-	public static void main(final String[] args) throws InterruptedException {
+public class Messenger {
+	public void connect(String email, String password) {
 		System.setProperty("webdriver.chrome.driver", "/usr/lib/chromium-browser/chromedriver");
 
 		ChromeOptions opt = new ChromeOptions();
@@ -20,9 +20,9 @@ public class Main {
 		WebDriver browser = new ChromeDriver(opt);
 		browser.get("https://m.facebook.com/messages/");
 		WebElement e = browser.findElement(By.id("m_login_email"));
-		e.sendKeys(args[0]);
+		e.sendKeys(email);
 		e = browser.findElement(By.id("m_login_password"));
-		e.sendKeys(args[1]);
+		e.sendKeys(password);
 
 		e = browser.findElement(By.xpath("//div[@data-sigil='login_password_step_element']/button"));
 		e.click();
@@ -47,8 +47,12 @@ public class Main {
 			System.out.println("text: " + r.getText());
 		});
 
-		browser.wait();
-
 		browser.close();
+		
+//		try {
+//			browser.wait();
+//		} catch (InterruptedException e1) {
+//			e1.printStackTrace();
+//		}
 	}
 }
