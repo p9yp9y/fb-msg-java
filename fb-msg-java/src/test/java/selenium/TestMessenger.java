@@ -10,13 +10,18 @@ public class TestMessenger {
 	public void testConnect() throws InterruptedException {
 		Messenger messenger = new Messenger();
 
-		messenger.connect(getProperty("email"), getProperty("password"));
+		messenger.login(getProperty("email"), getProperty("password"));
 		
-		messenger.selectFriend("Piroska Ráchegyi");
+		messenger.startConversation("Piroska Ráchegyi");
 		
-		messenger.send("Test message");
+		messenger.send("Test message 1");
+		
+		messenger.startConversation("Péter Dobrosi");
 		
 		//messenger.waitBrowser();
+		
+		messenger.logout();
+		
 		messenger.closeBrowser();
 	}
 }

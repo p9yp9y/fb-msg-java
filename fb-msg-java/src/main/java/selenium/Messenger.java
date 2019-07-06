@@ -3,8 +3,11 @@ package selenium;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -12,7 +15,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Messenger {
-
+	private static final String MESSAGES_URL = "https://m.facebook.com/messages/";
+	private final static Logger LOGGER = Logger.getLogger(Messenger.class.getName());
 	private ChromeDriver browser;
 	private WebDriverWait wait;
 
@@ -25,8 +29,8 @@ public class Messenger {
 
 		ChromeOptions opt = new ChromeOptions();
 
-		//opt.addArguments("user-data-dir=/home/andris/Asztal/testprof");
-		
+		opt.addArguments("user-data-dir=/home/andris/Asztal/testprof");
+
 		opt.setBinary("/usr/bin/chromium-browser");
 
 		browser = new ChromeDriver(opt);
@@ -34,25 +38,41 @@ public class Messenger {
 		wait = new WebDriverWait(browser, 10);
 	}
 
-	public void connect(String email, String password) {
-		browser.get("https://m.facebook.com/messages/");
-		WebElement e = browser.findElement(By.id("m_login_email"));
+	public void login(String email, String password) {
+		WebElement e;
+		browser.get("https://m.facebook.com/login/?ref=dbl&fl&refid=8");
+		try {
+			e = browser.findElement(By.id("m_login_email"));
+		} catch (NoSuchElementException exc) {
+			LOGGER.log(Level.WARNING, "Already logged in.");
+			return;
+		}
+
 		e.sendKeys(email);
 		e = browser.findElement(By.id("m_login_password"));
 		e.sendKeys(password);
 
 		e = browser.findElement(By.xpath("//div[@data-sigil='login_password_step_element']/button"));
 		e.click();
-
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("threadlist_rows")));
-
+	}
+	
+	public void logout() {
+		browser.manage().deleteAllCookies();
 	}
 
 	public List<String> listFriends() {
 		return getFriendsRows().stream().map(r -> getFriendName(r)).collect(toList());
 	}
 
-	public void selectFriend(String friendName) {
+	public void startConversation(String friendName) {
+		By by = By.id("threadlist_rows");
+		try {
+			browser.findElement(by);
+		} catch (NoSuchElementException exc) {
+			browser.get(MESSAGES_URL);
+			wait.until(ExpectedConditions.visibilityOfElementLocated(by));
+		}
+
 		getFriendRow(friendName).click();
 
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("_z3m")));
