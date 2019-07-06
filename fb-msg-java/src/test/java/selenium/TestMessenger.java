@@ -16,12 +16,10 @@ public class TestMessenger {
 		
 		messenger.send("Test message 1");
 		
-		messenger.startConversation("Péter Dobrosi");
+		messenger.waitBrowser();
 		
-		//messenger.waitBrowser();
+		//messenger.logout();
 		
-		messenger.logout();
-		
-		messenger.closeBrowser();
+		//messenger.closeBrowser();
 	}
 }

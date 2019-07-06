@@ -8,14 +8,17 @@ import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Messenger {
 	private static final String MESSAGES_URL = "https://m.facebook.com/messages/";
+	private By threadListRows = By.id("threadlist_rows");
 	private final static Logger LOGGER = Logger.getLogger(Messenger.class.getName());
 	private ChromeDriver browser;
 	private WebDriverWait wait;
@@ -40,22 +43,32 @@ public class Messenger {
 
 	public void login(String email, String password) {
 		WebElement e;
-		browser.get("https://m.facebook.com/login/?ref=dbl&fl&refid=8");
+		browser.get(MESSAGES_URL);
 		try {
 			e = browser.findElement(By.id("m_login_email"));
+			e.sendKeys(email);
 		} catch (NoSuchElementException exc) {
-			LOGGER.log(Level.WARNING, "Already logged in.");
-			return;
+			try {
+				e = browser.findElement(By.tagName("form"));
+			} catch (NoSuchElementException exc2) {
+				return;
+			}
+			if (e.getAttribute("action").contains("/login/device-based/validate-pin/")) {
+				e.submit();
+			} else {
+				return;
+			}
 		}
 
-		e.sendKeys(email);
-		e = browser.findElement(By.id("m_login_password"));
+		e = browser.findElement(By.xpath("//input[@type='password']"));
 		e.sendKeys(password);
 
-		e = browser.findElement(By.xpath("//div[@data-sigil='login_password_step_element']/button"));
+		e = browser.findElement(By.xpath("//button"));
 		e.click();
+
+		waitForThreadListRows();
 	}
-	
+
 	public void logout() {
 		browser.manage().deleteAllCookies();
 	}
@@ -65,23 +78,49 @@ public class Messenger {
 	}
 
 	public void startConversation(String friendName) {
-		By by = By.id("threadlist_rows");
 		try {
-			browser.findElement(by);
+			browser.findElement(threadListRows);
 		} catch (NoSuchElementException exc) {
 			browser.get(MESSAGES_URL);
-			wait.until(ExpectedConditions.visibilityOfElementLocated(by));
+			waitForThreadListRows();
 		}
 
 		getFriendRow(friendName).click();
 
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("_z3m")));
 
-		List<WebElement> l = browser.findElements(By.className("_z3m"));
+		List<WebElement> l = browser.findElements(By.xpath("//div[@class='msg']/div/span/div/div"));
+
+		LOGGER.log(Level.INFO, "Messages: " + l.size());
 
 		l.forEach(r -> {
-			System.out.println("text: " + r.getText());
+			LOGGER.log(Level.INFO, "text: " + r.getText());
 		});
+
+		startListener();
+	}
+
+	private void startListener() {
+		new Thread() {
+			public void run() {
+				while (true) {
+					int messagesSize = getMessages(browser).size();
+					new WebDriverWait(browser, 1000000, 500).until(new ExpectedCondition<Boolean>() {
+						@Override
+						public Boolean apply(WebDriver driverObject) {
+
+							return messagesSize < getMessages(driverObject).size();
+						}
+					});
+					LOGGER.log(Level.WARNING, "!!!!!!!!!!!!!!!!!!!!!!");
+				}
+
+			}
+		}.start();
+	}
+
+	private List<WebElement> getMessages(WebDriver browser) {
+		return browser.findElements(By.xpath("//div[@class='msg']/div/span/div/div"));
 	}
 
 	public void send(String message) {
@@ -93,7 +132,9 @@ public class Messenger {
 	}
 
 	public void waitBrowser() throws InterruptedException {
-		browser.wait();
+		synchronized (browser) {
+			browser.wait();
+		}
 	}
 
 	public void closeBrowser() {
@@ -111,5 +152,9 @@ public class Messenger {
 
 	private WebElement getFriendRow(String friendName) {
 		return getFriendsRows().stream().filter(r -> getFriendName(r).equals(friendName)).findFirst().get();
+	}
+
+	private WebElement waitForThreadListRows() {
+		return wait.until(ExpectedConditions.visibilityOfElementLocated(threadListRows));
 	}
 }
