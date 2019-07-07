@@ -1,0 +1,5 @@
+-method login -email YOUR_EMAIL -password YOUR_PASSWORD
+
+-method startConversation -friendName "YOUR_FRIEND"
+
+-method send -message "YOUR_MESSAGE"

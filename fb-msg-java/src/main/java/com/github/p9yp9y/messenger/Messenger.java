@@ -1,4 +1,4 @@
-package selenium;
+package com.github.p9yp9y.messenger;
 
 import static java.util.stream.Collectors.toList;
 
@@ -16,7 +16,26 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.beust.jcommander.Parameter;
+
+import pgy.master.util.JCommanderUtil;
+
 public class Messenger {
+	@Parameter(names = { "-method" }, required = true)
+	private String method;
+
+	@Parameter(names = { "-email" })
+	private String email;
+
+	@Parameter(names = { "-password" })
+	private String password;
+
+	@Parameter(names = { "-message" })
+	private String message;
+
+	@Parameter(names = { "-friendName" })
+	private String friendName;
+
 	private static final String MESSAGES_URL = "https://m.facebook.com/messages/";
 	private By threadListRows = By.id("threadlist_rows");
 	private final static Logger LOGGER = Logger.getLogger(Messenger.class.getName());
@@ -24,7 +43,31 @@ public class Messenger {
 	private WebDriverWait wait;
 
 	public Messenger() {
+		this(new String[] {});
+	}
+
+	public Messenger(String[] args) {
+		JCommanderUtil.parseArgs(this, args);
 		init();
+		exec();
+	}
+
+	public static void main(String[] args) {
+		new Messenger(args);
+	}
+
+	private void exec() {
+		if ("login".equals(method)) {
+			login(email, password);
+		} else if ("logout".equals(method)) {
+			logout();
+		} else if ("send".equals(method)) {
+			send(message);
+		} else if ("startConversation".equals(method)) {
+			startConversation(friendName);
+		} else {
+			throw new RuntimeException("This method not found: " + method);
+		}
 	}
 
 	private void init() {
