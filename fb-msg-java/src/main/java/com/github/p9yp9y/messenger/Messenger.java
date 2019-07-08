@@ -40,9 +40,6 @@ import pgy.master.util.JCommanderUtil;
 public class Messenger {
 	private final static Logger LOGGER = Logger.getLogger(Messenger.class.getName());
 
-	@Parameter(names = {"-headless"})
-	private boolean headless = true;
-
 	@Parameter(names = {"-method"}, required = true)
 	private String method;
 
@@ -63,6 +60,12 @@ public class Messenger {
 
 	@Parameter(names = {"-in"}, converter = InputStreamConverter.class)
 	private InputStream in;
+
+	@Parameter(names = {"-headless"})
+	private boolean headless = true;
+	
+	@Parameter(names = {"-waitTimeOut"})
+	private int waitTimeOut = 300;
 
 	private List<MessageReceiveListener> messageListeners = new ArrayList<>();
 
@@ -158,7 +161,7 @@ public class Messenger {
 			}
 		});
 
-		wait = new WebDriverWait(browser, 100);
+		wait = new WebDriverWait(browser, waitTimeOut);
 	}
 
 	public Messenger login(final String email, final String password) {
