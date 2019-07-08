@@ -16,6 +16,8 @@ Samples:
 
 -method login -email YOUR_EMAIL -password YOUR_PASSWORD
 
+-method logout
+
 -method startConversation -friendName "YOUR_FRIEND"
 
 -method send -message "YOUR_MESSAGE"

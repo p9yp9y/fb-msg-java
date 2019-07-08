@@ -40,6 +40,9 @@ import pgy.master.util.JCommanderUtil;
 public class Messenger {
 	private final static Logger LOGGER = Logger.getLogger(Messenger.class.getName());
 
+	@Parameter(names = {"-headless"})
+	private boolean headless = true;
+
 	@Parameter(names = {"-method"}, required = true)
 	private String method;
 
@@ -64,8 +67,11 @@ public class Messenger {
 	private List<MessageReceiveListener> messageListeners = new ArrayList<>();
 
 	private static final String MESSAGES_URL = "https://m.facebook.com/messages/";
+	
 	private By threadListRows = By.id("threadlist_rows");
+	
 	private ChromeDriver browser;
+	
 	private WebDriverWait wait;
 
 	private class InputStreamConverter implements IStringConverter<InputStream> {
@@ -137,8 +143,11 @@ public class Messenger {
 		File f = new File(home + "/.config/java-messenger/chromium-profile");
 		f.mkdirs();
 
-		opt.addArguments("user-data-dir=" + f.getPath());
 		opt.setBinary("/usr/bin/chromium-browser");
+		opt.addArguments("user-data-dir=" + f.getPath());
+		if (headless) {
+			opt.addArguments("headless");
+		}
 
 		browser = new ChromeDriver(opt);
 
@@ -149,7 +158,7 @@ public class Messenger {
 			}
 		});
 
-		wait = new WebDriverWait(browser, 10);
+		wait = new WebDriverWait(browser, 100);
 	}
 
 	public Messenger login(final String email, final String password) {
