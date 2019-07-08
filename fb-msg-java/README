@@ -1,4 +1,4 @@
-[Install]
+## Install
 
 Install Chromium and Chromium web driver before.
 
@@ -8,11 +8,11 @@ Compile executable jar file.
 
 mvn clean compile assembly:single
 
-[Run]
+## Run
 
 java -jar target/java-messenger-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 
-Samples:
+### Samples
 
 -method login -email YOUR_EMAIL -password YOUR_PASSWORD
 
